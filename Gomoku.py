@@ -22,20 +22,20 @@ map1 =[
         ['├','─','┼','─','┼','─','┼','─','┼','─','┼','─','┼','─','┼','─','┼','─','┼','─','┼','─','┼','─','┼','─','┼','─','┼','─','┼','─','┼','─','┼','─','┤'],
         ['└','─','┴','─','┴','─','┴','─','┴','─','┴','─','┴','─','┴','─','┴','─','┴','─','┴','─','┴','─','┴','─','┴','─','┴','─','┴','─','┴','─','┴','─','┘']
     ]
-
-map2 = [[0 for _ in range(29)] for _ in range(29)]
-black=1
-white=2
+#화면 그리기용
+map2 = [[0 for _ in range(29)] for _ in range(29)]#가중치 저장용
+black=1#검정돌
+white=2#하얀돌
 dol = black
 
 
-cursor_x, cursor_y = 1, 1
-dolx, doly = 5, 5
-gameIng = True
-winDolChk=0
+cursor_x, cursor_y = 1, 1# 커서 위치
+dolx, doly = 5, 5# 실제 맵에 연결 될 커서
+gameIng = True#플레이 중 체크
+winDolChk=0# 어떤 돌이 이겼는지 비교용
 
-PC_PLAY = 0
-TWO_PLAY=1
+PC_PLAY = 0#1인 플레이 모드
+TWO_PLAY=1#2인 플레이 모드
 mode = 0
 
 
@@ -65,7 +65,7 @@ class pc:
     attackLevelFour_oneBlock = -700
     attackLevelFour = -800           # 열린4, 즉시승리 가능
     
-    dolMin=0
+    dolMin=0#가장 가중치가 변화된 값을 체크하기 위한 변수
     setDolX=0
     setDolY=0
     dol = white
@@ -75,14 +75,14 @@ class pc:
     def __init__(self,mapchk):
         self.map=deepcopy(mapchk)
 
-    def setMyDol(self, dol):
+    def setMyDol(self, dol):#pc용 돌 설정(검흰)
         self.dol=dol
         if dol==black:
             self.rival=white
         elif dol==white:
             self.rival=black
 
-    def weightChk(self,mapchk):
+    def weightChk(self,mapchk):#가중치 측정
         global winDolChk
         directions = [
         (0, 1), (0, -1), (1, 0), (-1, 0),  # 오른쪽, 왼쪽, 아래, 위
@@ -197,11 +197,11 @@ class pc:
                     self.setDolY=y
         self.dolMin=0
     
-    def setDol(self):
+    def setDol(self):#커서에 돌 두기
         global map2
         map2[self.setDolY][self.setDolX] = self.dol                   
     
-    def showMap(self):
+    def showMap(self):#맵 그리기(디버깅용)
         for i in range(0,29,1):
             for j in range(0,29,1):
                 print(self.map[i][j],end=' ')
@@ -213,7 +213,7 @@ ai = pc(map2)
 
 
 
-def on_press():
+def on_press():#키 입력
     global cursor_x, cursor_y, doly, dolx, dol, gameIng, winDolChk
     key = screen.getKey()  # 키 입력 대기 (1byte 입력받기)
     # 전역 변수 사용
@@ -229,19 +229,19 @@ def on_press():
     elif key == 'd':  # D: 오른쪽으로 이동
         cursor_x = min(37, cursor_x + 2)  # 오른쪽 경계값 제한
         dolx = min(23, dolx + 1) 
-    elif key == 'l':
-        if map2[doly][dolx]==0:
+    elif key == 'l': # 돌 두기
+        if map2[doly][dolx]==0:#돌이 비워져 있으면 돌 두기
             map2[doly][dolx] = dol
-            if winChk(dolx,doly,dol):
+            if winChk(dolx,doly,dol):#이겼는지 체크
                 gameIng=False
                 winDolChk = dol
                 return
-            elif mode == TWO_PLAY:
+            elif mode == TWO_PLAY:#2인 플레이면 돌만 바꾸어서 코드 진행
                 if dol==black:
                     dol=white
                 else:
                     dol=black
-            elif mode == PC_PLAY:
+            elif mode == PC_PLAY:#1인 플레이면 pc가 플레이
                 ai.weightChk(map2)
                 ai.setDol()
                 if winChk(ai.setDolX,ai.setDolY,ai.dol):
@@ -249,8 +249,9 @@ def on_press():
                     winDolChk = ai.dol
 
 
-
+#이겼는지 확인
 def winChk(x,y,dol):
+    #각 방향 돌 몇개있는지 체크용
     right=0
     left=0
     up=0
@@ -260,6 +261,7 @@ def winChk(x,y,dol):
     leup=0
     ledo=0
 
+    #재귀함수로 체크
     right = chkDol(x+1,y,1,0,dol,right)
     left = chkDol(x-1,y,-1,0,dol,left)
     up = chkDol(x,y-1,0,-1,dol,up)
@@ -269,6 +271,7 @@ def winChk(x,y,dol):
     leup = chkDol(x-1,y-1,-1,-1,dol,leup)
     ledo = chkDol(x-1,y+1,-1,1,dol,ledo)
     
+    #각 방향 양쪽으로 더해서 5 이상이면 승리로 체크
     if right + left + 1 > 4:
         return True
     elif up + down + 1 >4:
@@ -278,12 +281,12 @@ def winChk(x,y,dol):
     elif rido + leup + 1 >4:
         return True
     return False
-
+#연결된 돌 찾는 함수
 def chkDol(x,y,plusX,plusY,dol,wei):
     if map2[y][x]==dol:
         wei = chkDol(x+plusX,y+plusY,plusX,plusY,dol,wei+1)
     return wei
-
+#오목 판 그리기
 def drawMap():
     screen.move_cursor_to(0,0)
     print("\n\n\n\n\n\n\n\n\n\n\n")
@@ -314,7 +317,8 @@ def drawMap():
 
 setPlayModeIng = True
 setDolIng=True
-def on_press_setDol():
+#메뉴 키 입력
+def on_press_menu():
     global cursor_y, dol, setDolIng,setPlayModeIng
     key = screen.getKey()  # 키 입력 대기 (1byte 입력받기)
     # 전역 변수 사용
@@ -335,7 +339,7 @@ def on_press_setDol():
         setDolIng=False
         setPlayModeIng=False
         
-
+#기본 화면
 def drawMenu():
     screen.move_cursor_to(0,0)
     print("╔═══════════════════════════════════════════════════════════════════════════╗\r")
@@ -365,6 +369,7 @@ def drawMenu():
     print("║                                                                           ║\r")
     print("╚═══════════════════════════════════════════════════════════════════════════╝\r")
 
+#하얀 돌 이기면
 def drawWhiteWin():
     screen.move_cursor_to(0,0)
     print("\r")
@@ -380,6 +385,7 @@ def drawWhiteWin():
     print("\r")
     print("\r")
 
+#검은 돌 이기면
 def drawBlackWin():
     screen.move_cursor_to(0,0)
     print("\r")
@@ -419,6 +425,7 @@ def drawPlayModeMenu():
         screen.move_cursor_to(33,19)
         print("--> 2인 플레이\r")
 
+#사용할 돌 선택
 def drawSetDolMenu():
     global setDolIng
     screen.clearScreen()
@@ -426,9 +433,10 @@ def drawSetDolMenu():
     drawMenu()
     while setDolIng:
         drawDolMenu()
-        on_press_setDol()
+        on_press_menu()
     screen.clearScreen()
 
+#1인모드 2인보드 선택
 def drawSetPlayModeMenu():
     global cursor_y, setPlayModeIng,mode
     screen.clearScreen()
@@ -436,7 +444,7 @@ def drawSetPlayModeMenu():
     drawMenu()
     while setPlayModeIng:
         drawPlayModeMenu()
-        on_press_setDol()
+        on_press_menu()
     mode = cursor_y-1
     cursor_y=1
     screen.clearScreen()
@@ -444,10 +452,10 @@ def drawSetPlayModeMenu():
 
 def main():
     global gameIng, dolx, doly, cursor_x, cursor_y
-    for i in range(0,29,1):
+    for i in range(0,29,1):#맵 초기화
         for j in range(0,29,1):
             map2[i][j]=0
-    for i in range(0,29,1):
+    for i in range(0,29,1):#맵초기화
         map2[i][0]=3
         map2[i][1]=3
         map2[i][2]=3
@@ -469,6 +477,7 @@ def main():
         map2[27][i]=3
         map2[28][i]=3
 
+    #모드 및 돌 선택
     drawSetPlayModeMenu()
     if mode == PC_PLAY:
         drawSetDolMenu()  
@@ -476,7 +485,7 @@ def main():
             map2[14][14]=black
     drawMap()
 
-
+    #오목 시작
     cursor_x, cursor_y = 1, 1
     dolx, doly = 5, 5
     while gameIng:
