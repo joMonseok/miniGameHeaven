@@ -313,7 +313,7 @@ def drawMap():
             else:
                 str = map1[i][j]
             startStr= ""+startStr+str+lastStr
-            screen.printColor(j+4,i+drawMapY,startStr,color)
+            screen.printColor(j+43,i+drawMapY+10,startStr,color)
             y=y+1
 
 setPlayModeIng = True
@@ -370,44 +370,44 @@ drawMainMenuLines = [
 ]
 #기본 화면
 def drawMenu():
-    y=0
+    y=10
     for line in drawMainMenuLines:     # lines: 한 줄씩 분리된 문자열 리스트
-        screen.print(0, y, line)
+        screen.print(25, y, line)
         y += 1
 
 #하얀 돌 이기면
 def drawWhiteWin():
-    screen.print(0,3,"    ██     ██ ██    ██ ██████ ████████ ██████")
-    screen.print(0,4,"    ██     ██ ██    ██   ██      ██    ██    ")
-    screen.print(0,5,"    ██  █  ██ ████████   ██      ██    ██████")
-    screen.print(0,6,"    ██ ███ ██ ██    ██   ██      ██    ██    ")
-    screen.print(0,7,"     ███ ███  ██    ██ ██████    ██    ██████")
-    screen.print(0,9,"                ██████ ██ ██ ████")
+    screen.print(36,13,"    ██     ██ ██    ██ ██████ ████████ ██████")
+    screen.print(36,14,"    ██     ██ ██    ██   ██      ██    ██    ")
+    screen.print(36,15,"    ██  █  ██ ████████   ██      ██    ██████")
+    screen.print(36,16,"    ██ ███ ██ ██    ██   ██      ██    ██    ")
+    screen.print(36,17,"     ███ ███  ██    ██ ██████    ██    ██████")
+    screen.print(36,19,"                ██████ ██ ██ ████")
 
 #검은 돌 이기면
 def drawBlackWin():
-    screen.print(0,3,"    ██████  ██      █████   ██████  ██   ██")
-    screen.print(0,4,"    ██   ██ ██     ██   ██ ██       ██  ██ ")
-    screen.print(0,5,"    ██████  ██     ███████ ██       █████  ")
-    screen.print(0,6,"    ██   ██ ██     ██   ██ ██       ██  ██ ")
-    screen.print(0,7,"    ██████  ██████ ██   ██  ██████  ██   ██")
-    screen.print(0,9,"                ██████ ██ ██ ████")
+    screen.print(36,13,"    ██████  ██      █████   ██████  ██   ██")
+    screen.print(36,14,"    ██   ██ ██     ██   ██ ██       ██  ██ ")
+    screen.print(36,15,"    ██████  ██     ███████ ██       █████  ")
+    screen.print(36,16,"    ██   ██ ██     ██   ██ ██       ██  ██ ")
+    screen.print(36,17,"    ██████  ██████ ██   ██  ██████  ██   ██")
+    screen.print(36,19,"                ██████ ██ ██ ████")
 
 def drawDolMenu():
     if(cursor_y==1):
-        screen.print(33,18,"--> Black Dol\r")
-        screen.print(33,19,"White Dol    \r")
+        screen.print(58,28,"--> Black Dol\r")
+        screen.print(58,29,"White Dol    \r")
     else:
-        screen.print(33,18,"Black Dol    \r")
-        screen.print(33,19,"--> White Dol\r")
+        screen.print(58,28,"Black Dol    \r")
+        screen.print(58,29,"--> White Dol\r")
 
 def drawPlayModeMenu():
     if(cursor_y==1):
-        screen.print(33,18,"--> one Person Play\r")
-        screen.print(33,19,"two Person Play    \r")
+        screen.print(58,28,"--> one Person Play\r")
+        screen.print(58,29,"two Person Play    \r")
     else:
-        screen.print(33,18,"one Person Play    \r")
-        screen.print(33,19,"--> two Person Play\r")
+        screen.print(58,28,"one Person Play    \r")
+        screen.print(58,29,"--> two Person Play\r")
 
 #사용할 돌 선택
 def drawSetDolMenu():

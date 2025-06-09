@@ -1,6 +1,5 @@
 import os
 import platform
-import threading
 import screen
 import time
 
@@ -21,28 +20,33 @@ def draw():
     bar = ['-'] * WIDTH
     bar[position] = '|'
     str = ''.join(bar)
-    screen.print(1,2,"Player 1: [A] / Player 2: [L]")
-    screen.print(1,3,"Press the keys quickly to defeat your opponent!")
-    screen.print(0,5, str)
+    screen.print(40,20,"Player 1: [A] / Player 2: [L]")
+    screen.print(40,21,"Press the keys quickly to defeat your opponent!")
+    screen.print(45,24, str)
     screen.refresh()
 
+def onPress_key():
+    global position
+    key = screen.getKey()
+    
+    if key == 'a':
+        position = position-1
+        if position <= 0:
+            screen.clear()
+            screen.print(40,21,"🎉 Player 1 Wins!")
+            screen.refresh()
+            return False
+    elif key == 'l':
+        position = position+1
+        if position >= WIDTH - 1:
+            screen.clear()
+            screen.print(40,21,"🎉 Player 2 Wins!")
+            screen.refresh()
+            return False
+    draw()
+    return True
+    
 
-# 플레이어 입력 감지
-def player_listener(player_key, direction):
-    global position, game_over
-    while not game_over:
-        key = screen.getKey()
-        if key == player_key:
-            position += direction
-            draw()
-            if position <= 0:
-                print()
-                print("\n🎉 Player 1 Wins!")
-                game_over = True
-            elif position >= WIDTH - 1:
-                print()
-                print("\n🎉 Player 2 Wins!")
-                game_over = True
 
 mainScreenLines = [
     " ________  __    __   ______          ______   ________        __       __   ______   _______  ",
@@ -61,29 +65,30 @@ def tug_of_war():
     position = CENTER
     game_over = False
     screen.clear()
-    y=2
+    y=20
     for mainScreenLine in mainScreenLines:
-        screen.print(0,y,mainScreenLine)
+        screen.print(20,y,mainScreenLine)
         y=y+1
     y=y+2
     screen.print(27,y,"Press Any Key to Start the Game")
     screen.refresh()
     start = ''
     key=screen.getKey()
+    gameIng=True
     if start == '':
         screen.clearScreen()
-        screen.print(1,2, "╔════════════════════════════════════════════════════════════════════╗\n")
-        screen.print(1,3, "║                         🕹️  How to play guide                       ║\n")
-        screen.print(1,4, "╠════════════════════════════════════════════════════════════════════╣\n")
-        screen.print(1,5, "║   🔹 It\'s a two-player keyboard combo game.                        ║\n")
-        screen.print(1,6, "║                                                                    ║\n")
-        screen.print(1,7, "║   🔸 Player 1 : [ A ] Keep hitting the keys!                       ║\n")
-        screen.print(1,8, "║   🔸 Player 2 : [ L ] Keep hitting the keys!                       ║\n")
-        screen.print(1,9, "║                                                                    ║\n")
-        screen.print(1,10,"║   ⏱️ The person who pulls the rope all the way to the end wins!    ║\n")
-        screen.print(1,11,"║                                                                    ║\n")
-        screen.print(1,12,"║   🚀 When you are ready, press any key to start the game.          ║\n")
-        screen.print(1,13,"╚════════════════════════════════════════════════════════════════════╝\n")
+        screen.print(27,12, "╔════════════════════════════════════════════════════════════════════╗\n")
+        screen.print(27,13, "║                         🕹️  How to play guide                       ║\n")
+        screen.print(27,14, "╠════════════════════════════════════════════════════════════════════╣\n")
+        screen.print(27,15, "║   🔹 It\'s a two-player keyboard combo game.                        ║\n")
+        screen.print(27,16, "║                                                                    ║\n")
+        screen.print(27,17, "║   🔸 Player 1 : [ A ] Keep hitting the keys!                       ║\n")
+        screen.print(27,18, "║   🔸 Player 2 : [ L ] Keep hitting the keys!                       ║\n")
+        screen.print(27,19, "║                                                                    ║\n")
+        screen.print(27,20,"║   ⏱️ The person who pulls the rope all the way to the end wins!    ║\n")
+        screen.print(27,21,"║                                                                    ║\n")
+        screen.print(27,22,"║   🚀 When you are ready, press any key to start the game.          ║\n")
+        screen.print(27,23,"╚════════════════════════════════════════════════════════════════════╝\n")
         screen.refresh()
 
         screen.getKey()
@@ -91,18 +96,10 @@ def tug_of_war():
         screen.clearScreen()
         draw()
 
-        t1 = threading.Thread(target=player_listener, args=('a', -1))
-        t2 = threading.Thread(target=player_listener, args=('l', 1))
+        while gameIng:
+            gameIng = onPress_key()
 
-        t1.start()
-        t2.start()
 
-        t1.join()
-        t2.join()
-
-    screen.clearScreen()
-    screen.print(1,3,"\nGAME OVER!")
-    screen.refresh()
     time.sleep(5)  # 5초 대기
 
 

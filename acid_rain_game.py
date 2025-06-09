@@ -76,6 +76,7 @@ def game():
                     if word.text == typed_word:
                         screen.print(word.x,word.y, "          ")
                         screen.print(word.x,word.y+1, "          ")
+                        screen.print(word.x,word.y-1, "          ")
                         falling_words.remove(word)
                         score += 1
                         matched = True

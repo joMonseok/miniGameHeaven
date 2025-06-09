@@ -71,14 +71,14 @@ mainScreenLines = [
 
 def mainScreen():
     #screen.move_cursor_to(0, 0)
-    y=0
+    y=10
     for line in mainScreenLines:     # lines: 한 줄씩 분리된 문자열 리스트
-        screen.print(0, y, line)
+        screen.print(25, y, line)
         y += 1
 
 def showMenu():
-    x=32
-    y=23
+    x=57
+    y=33
     #screen.move_cursor_to(x, y)
     i=0
     for item in menu:

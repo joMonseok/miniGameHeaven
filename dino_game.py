@@ -33,7 +33,7 @@ obstacles = []
 OBSTACLE_TYPES = ['🌵', '🌵🌵']
 
 # 캐릭터와 게임 요소
-DINO = '🦖'
+DINO = '⊇'
 GROUND = '═'
 EMPTY = ' '
 
@@ -69,10 +69,10 @@ def show_title_screen():
     start_x = 10  # 시작 x 위치
     
     for i, line in enumerate(TITLE_ART):
-        screen.print(start_x, start_y + i,line)
+        screen.print(start_x+20, start_y + i+10,line)
     
     # 시작 안내 메시지
-    screen.print(35, start_y + 8,"Start the game...")
+    screen.print(55, start_y + 18,"Start the game...")
     screen.refresh()
 
     time.sleep(2)  # 2초 대기
@@ -171,7 +171,7 @@ def draw_game():
     y=0
     for row in game_display:
         str= ''.join(row)
-        screen.print(0, y, str)
+        screen.print(20, y+10, str)
         y=y+1
         #print(''.join(row), '\r')
     screen.refresh()
@@ -200,9 +200,9 @@ def main():
                 draw_game()    # 화면 그리기
             else:
                 screen.clear()
-                screen.print(35, 10,"Game Over!")
-                screen.print(30, 11, f"Score: {score}")
-                screen.print(25, 12,"Press Q to return to menu...")
+                screen.print(55, 20,"Game Over!")
+                screen.print(50, 21, f"Score: {score}")
+                screen.print(45, 22,"Press Q to return to menu...")
                 screen.refresh()
                 try:
                     key = screen.getKey()
