@@ -59,10 +59,7 @@ def setup_terminal():
         tty.setraw(sys.stdin.fileno())
 
 def restore_terminal():
-    """터미널 설정 복원"""
-    global old_settings
-    if platform.system() != "Windows" and old_settings:
-        termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
+    screen.clearScreen()
 
 def show_title_screen():
     screen.clearScreen()
@@ -72,13 +69,12 @@ def show_title_screen():
     start_x = 10  # 시작 x 위치
     
     for i, line in enumerate(TITLE_ART):
-        screen.move_cursor_to(start_x, start_y + i)
-        print(line)
+        screen.print(start_x, start_y + i,line)
     
     # 시작 안내 메시지
-    screen.move_cursor_to(35, start_y + 8)
-    print("게임을 시작합니다...")
-    
+    screen.print(35, start_y + 8,"Start the game...")
+    screen.refresh()
+
     time.sleep(2)  # 2초 대기
     screen.clearScreen()
 
@@ -92,33 +88,15 @@ def reset_game():
     jump_velocity = 0
     obstacles = []
 
-def check_input():
+def check_input(key):
     global is_jumping, gameIng, jump_velocity
     
-    if platform.system() == "Windows":
-        # Windows용 키 입력
-        if key_input_module.kbhit():
-            try:
-                key = key_input_module.getch().decode('utf-8')
-                if key == ' ' and not is_jumping:  # 스페이스바로 점프
-                    is_jumping = True
-                    jump_velocity = JUMP_FORCE
-                elif key == 'q':  # q로 게임 종료
-                    gameIng = False
-            except:
-                pass
-    else:
-        # macOS/Linux용 비동기 키 입력
-        if sys.stdin in select.select([sys.stdin], [], [], 0)[0]:
-            try:
-                key = sys.stdin.read(1)
-                if key == ' ' and not is_jumping:  # 스페이스바로 점프
-                    is_jumping = True
-                    jump_velocity = JUMP_FORCE
-                elif key == 'q':  # q로 게임 종료
-                    gameIng = False
-            except:
-                pass
+    if key == ' ' and not is_jumping:  # 스페이스바로 점프
+        is_jumping = True
+        jump_velocity = JUMP_FORCE
+    elif key == 'q':  # q로 게임 종료
+        screen.reset()
+        gameIng = False
 
 def update_game():
     global dino_y, is_jumping, jump_velocity, score, game_over
@@ -160,7 +138,6 @@ def update_game():
             return
 
 def draw_game():
-    screen.move_cursor_to(0, 0)
     
     # 게임 화면 초기화
     game_display = [[EMPTY for _ in range(82)] for _ in range(20)]
@@ -181,43 +158,57 @@ def draw_game():
         game_display[GROUND_Y + 1][x] = GROUND
     
     # 점수 표시
-    score_text = f'점수: {score}'
+    score_text = f'score: {score}'
     for i, char in enumerate(score_text):
         game_display[1][70 + i] = char
     
     # 조작법 표시
-    controls_text = "스페이스바: 점프  Q: 종료"
+    controls_text = "spacebar: jump  Q: quit"
     for i, char in enumerate(controls_text):
         game_display[1][2 + i] = char
     
     # 화면 출력
+    y=0
     for row in game_display:
-        print(''.join(row), '\r')
+        str= ''.join(row)
+        screen.print(0, y, str)
+        y=y+1
+        #print(''.join(row), '\r')
+    screen.refresh()
     
-    if game_over:
-        screen.move_cursor_to(35, 10)
-        print("게임 오버!")
-        screen.move_cursor_to(30, 11)
-        print(f"스코어: {score}")
-        screen.move_cursor_to(25, 12)
-        print("Q를 누르면 메뉴로 돌아갑니다...")
-
+        
 def main():
     global gameIng, game_over
-    
+    oneResetChk=True
     try:
-        setup_terminal()  # 터미널 설정
+        #setup_terminal()  # 터미널 설정
         show_title_screen()  # 타이틀 화면 표시
         reset_game()
         
+        screen.getStdscr().nodelay(True) # True로 키 입력 비동기 처리 
+        screen.getStdscr().timeout(50)  # 입력 대기 시간 설정 (ms)
+        
         while gameIng:
             if not game_over:
-                check_input()  # 키 입력 확인
+                try:
+                    key = screen.getKey()
+                    check_input(key)  # 키 입력 확인
+                except:
+                    pass # 입력이 없을 경우 넘어감 
+
                 update_game()  # 게임 상태 업데이트
                 draw_game()    # 화면 그리기
-                time.sleep(0.05)  # 게임 속도 조절
             else:
-                check_input()  # 게임 오버 상태에서 Q 키 입력 대기
+                screen.clear()
+                screen.print(35, 10,"Game Over!")
+                screen.print(30, 11, f"Score: {score}")
+                screen.print(25, 12,"Press Q to return to menu...")
+                screen.refresh()
+                try:
+                    key = screen.getKey()
+                    check_input(key)  # 게임 오버 상태에서 Q 키 입력 대기
+                except:
+                    pass # 입력이 없을 경우 넘어감 
         
         screen.clearScreen()
         

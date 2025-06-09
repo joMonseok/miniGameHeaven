@@ -1,5 +1,6 @@
 import screen
 from copy import deepcopy
+import curses
 
 map1 =[
         ['┌','─','┬','─','┬','─','┬','─','┬','─','┬','─','┬','─','┬','─','┬','─','┬','─','┬','─','┬','─','┬','─','┬','─','┬','─','┬','─','┬','─','┬','─','┐'],
@@ -215,7 +216,7 @@ ai = pc(map2)
 
 def on_press():#키 입력
     global cursor_x, cursor_y, doly, dolx, dol, gameIng, winDolChk
-    key = screen.getKey()  # 키 입력 대기 (1byte 입력받기)
+    key = screen.getRowKey()  # 키 입력 대기 (1byte 입력받기)
     # 전역 변수 사용
     if key == 'w':  # W: 위로 이동
         cursor_y = max(1, cursor_y - 1)  # 위쪽 경계값 제한
@@ -229,7 +230,7 @@ def on_press():#키 입력
     elif key == 'd':  # D: 오른쪽으로 이동
         cursor_x = min(37, cursor_x + 2)  # 오른쪽 경계값 제한
         dolx = min(23, dolx + 1) 
-    elif key == 'l': # 돌 두기
+    elif key == '\n': # 돌 두기
         if map2[doly][dolx]==0:#돌이 비워져 있으면 돌 두기
             map2[doly][dolx] = dol
             if winChk(dolx,doly,dol):#이겼는지 체크
@@ -287,19 +288,19 @@ def chkDol(x,y,plusX,plusY,dol,wei):
         wei = chkDol(x+plusX,y+plusY,plusX,plusY,dol,wei+1)
     return wei
 #오목 판 그리기
+drawMapY=0
 def drawMap():
-    screen.move_cursor_to(0,0)
-    print("\n\n\n\n\n\n\n\n\n\n\n")
+    y=11
     for i in range(0,19,1):
         j2=0
-        print("                 ",end="")
+        curses.init_pair(1, curses.COLOR_WHITE, curses.COLOR_BLUE)
         for j in range(0,37,1):
             startStr = ""
             str = ""
             lastStr = ""
+            color = 0
             if i==cursor_y-1 and j==cursor_x-1:
-                startStr="\033[1;34m"
-                lastStr="\033[0m"
+                color=1
             if j%2==0:
                 if map2[i+5][j2+5]!=0:
                     if map2[i+5][j2+5]==black:
@@ -312,21 +313,21 @@ def drawMap():
             else:
                 str = map1[i][j]
             startStr= ""+startStr+str+lastStr
-            print(startStr,end="")
-        print("\r")
+            screen.printColor(j+4,i+drawMapY,startStr,color)
+            y=y+1
 
 setPlayModeIng = True
 setDolIng=True
 #메뉴 키 입력
 def on_press_menu():
     global cursor_y, dol, setDolIng,setPlayModeIng
-    key = screen.getKey()  # 키 입력 대기 (1byte 입력받기)
+    key = screen.getRowKey()  # 키 입력 대기 (1byte 입력받기)
     # 전역 변수 사용
     if key == 'w':  # W: 위로 이동
         cursor_y = 1
     elif key == 's':  # S: 아래로 이동
         cursor_y = 2
-    elif key == 'l':
+    elif key == '\n':
         if mode == PC_PLAY:
             if cursor_y==1:
                 dol = black
@@ -339,91 +340,74 @@ def on_press_menu():
         setDolIng=False
         setPlayModeIng=False
         
+drawMainMenuLines = [
+    "╔═══════════════════════════════════════════════════════════════════════════╗",
+    "║                                                                           ║",
+    "║               ██████╗ ███╗   ███╗ ██████╗  ██████╗ ██╗  ██╗               ║",
+    "║              ██╔═══██╗████╗ ████║██╔═══██╗██╔═══██╗██║ ██╔╝               ║",
+    "║              ██║   ██║██╔████╔██║██║   ██║██║   ██║█████╔╝                ║",
+    "║              ██║   ██║██║╚██╔╝██║██║   ██║██║   ██║██╔═██╗                ║",
+    "║              ╚██████╔╝██║ ╚═╝ ██║╚██████╔╝╚██████╔╝██║  ██╗               ║",
+    "║               ╚═════╝ ╚═╝     ╚═╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═╝               ║",
+    "║                                                                           ║",
+    "║                                                                           ║",
+    "║                                                                           ║",
+    "║                                                                           ║",
+    "║                     move : wasd   │   select : enter                      ║",
+    "║                                                                           ║",
+    "║     ┌──────────────────────────────────────────────────────────────┐      ║",
+    "║     │                                                              │      ║",
+    "║     │                                                              │      ║",
+    "║     │                                                              │      ║",
+    "║     │                                                              │      ║",
+    "║     │                                                              │      ║",
+    "║     │                                                              │      ║",
+    "║     │                                                              │      ║",
+    "║     │                                                              │      ║",
+    "║     └──────────────────────────────────────────────────────────────┘      ║",
+    "║                                                                           ║",
+    "╚═══════════════════════════════════════════════════════════════════════════╝"
+]
 #기본 화면
 def drawMenu():
-    screen.move_cursor_to(0,0)
-    print("╔═══════════════════════════════════════════════════════════════════════════╗\r")
-    print("║                                                                           ║\r")
-    print("║               ██████╗ ███╗   ███╗ ██████╗  ██████╗ ██╗  ██╗               ║\r")
-    print("║              ██╔═══██╗████╗ ████║██╔═══██╗██╔═══██╗██║ ██╔╝               ║\r")
-    print("║              ██║   ██║██╔████╔██║██║   ██║██║   ██║█████╔╝                ║\r")
-    print("║              ██║   ██║██║╚██╔╝██║██║   ██║██║   ██║██╔═██╗                ║\r")
-    print("║              ╚██████╔╝██║ ╚═╝ ██║╚██████╔╝╚██████╔╝██║  ██╗               ║\r")
-    print("║               ╚═════╝ ╚═╝     ╚═╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═╝               ║\r")
-    print("║                                                                           ║\r")
-    print("║                                                                           ║\r")
-    print("║                                                                           ║\r")
-    print("║                                                                           ║\r")
-    print("║                          이동 : wasd   │   선택 : l                       ║\r")
-    print("║                                                                           ║\r")
-    print("║     ┌──────────────────────────────────────────────────────────────┐      ║\r")
-    print("║     │                                                              │      ║\r")
-    print("║     │                                                              │      ║\r")
-    print("║     │                                                              │      ║\r")
-    print("║     │                                                              │      ║\r")
-    print("║     │                                                              │      ║\r")
-    print("║     │                                                              │      ║\r")
-    print("║     │                                                              │      ║\r")
-    print("║     │                                                              │      ║\r")
-    print("║     └──────────────────────────────────────────────────────────────┘      ║\r")
-    print("║                                                                           ║\r")
-    print("╚═══════════════════════════════════════════════════════════════════════════╝\r")
+    y=0
+    for line in drawMainMenuLines:     # lines: 한 줄씩 분리된 문자열 리스트
+        screen.print(0, y, line)
+        y += 1
 
 #하얀 돌 이기면
 def drawWhiteWin():
-    screen.move_cursor_to(0,0)
-    print("\r")
-    print("\r")
-    print("                ██     ██ ██    ██ ██████ ████████ ██████\r")
-    print("                ██     ██ ██    ██   ██      ██    ██    \r")
-    print("                ██  █  ██ ████████   ██      ██    ██████\r")
-    print("                ██ ███ ██ ██    ██   ██      ██    ██    \r")
-    print("                 ███ ███  ██    ██ ██████    ██    ██████\r")
-    print("\r")
-    print("                             ██████ ██ ██ ████\r")
-    print("\r")
-    print("\r")
-    print("\r")
+    screen.print(0,3,"    ██     ██ ██    ██ ██████ ████████ ██████")
+    screen.print(0,4,"    ██     ██ ██    ██   ██      ██    ██    ")
+    screen.print(0,5,"    ██  █  ██ ████████   ██      ██    ██████")
+    screen.print(0,6,"    ██ ███ ██ ██    ██   ██      ██    ██    ")
+    screen.print(0,7,"     ███ ███  ██    ██ ██████    ██    ██████")
+    screen.print(0,9,"                ██████ ██ ██ ████")
 
 #검은 돌 이기면
 def drawBlackWin():
-    screen.move_cursor_to(0,0)
-    print("\r")
-    print("\r")
-    print("                ██████  ██      █████   ██████  ██   ██\r")
-    print("                ██   ██ ██     ██   ██ ██       ██  ██ \r")
-    print("                ██████  ██     ███████ ██       █████  \r")
-    print("                ██   ██ ██     ██   ██ ██       ██  ██ \r")
-    print("                ██████  ██████ ██   ██  ██████  ██   ██\r")
-    print("\r")
-    print("                             ██████ ██ ██ ████\r")
-    print("\r")
-    print("\r")
-    print("\r")
+    screen.print(0,3,"    ██████  ██      █████   ██████  ██   ██")
+    screen.print(0,4,"    ██   ██ ██     ██   ██ ██       ██  ██ ")
+    screen.print(0,5,"    ██████  ██     ███████ ██       █████  ")
+    screen.print(0,6,"    ██   ██ ██     ██   ██ ██       ██  ██ ")
+    screen.print(0,7,"    ██████  ██████ ██   ██  ██████  ██   ██")
+    screen.print(0,9,"                ██████ ██ ██ ████")
 
 def drawDolMenu():
     if(cursor_y==1):
-        screen.move_cursor_to(33,18)
-        print("--> 검은 돌\r")
-        screen.move_cursor_to(33,19)
-        print("하얀 돌    \r")
+        screen.print(33,18,"--> Black Dol\r")
+        screen.print(33,19,"White Dol    \r")
     else:
-        screen.move_cursor_to(33,18)
-        print("검은 돌    \r")
-        screen.move_cursor_to(33,19)
-        print("--> 하얀 돌\r")
+        screen.print(33,18,"Black Dol    \r")
+        screen.print(33,19,"--> White Dol\r")
 
 def drawPlayModeMenu():
     if(cursor_y==1):
-        screen.move_cursor_to(33,18)
-        print("--> PC 플레이\r")
-        screen.move_cursor_to(33,19)
-        print("2인 플레이    \r")
+        screen.print(33,18,"--> one Person Play\r")
+        screen.print(33,19,"two Person Play    \r")
     else:
-        screen.move_cursor_to(33,18)
-        print("PC 플레이    \r")
-        screen.move_cursor_to(33,19)
-        print("--> 2인 플레이\r")
+        screen.print(33,18,"one Person Play    \r")
+        screen.print(33,19,"--> two Person Play\r")
 
 #사용할 돌 선택
 def drawSetDolMenu():
@@ -451,31 +435,16 @@ def drawSetPlayModeMenu():
 
 
 def main():
-    global gameIng, dolx, doly, cursor_x, cursor_y
+    global gameIng, dolx, doly, cursor_x, cursor_y, dol, drawMapY
     for i in range(0,29,1):#맵 초기화
         for j in range(0,29,1):
             map2[i][j]=0
     for i in range(0,29,1):#맵초기화
-        map2[i][0]=3
-        map2[i][1]=3
-        map2[i][2]=3
-        map2[i][3]=3
-        map2[i][4]=3
-        map2[0][i]=3
-        map2[1][i]=3
-        map2[2][i]=3
-        map2[3][i]=3
-        map2[4][i]=3
-        map2[i][24]=3
-        map2[i][25]=3
-        map2[i][26]=3
-        map2[i][27]=3
-        map2[i][28]=3
-        map2[24][i]=3
-        map2[25][i]=3
-        map2[26][i]=3
-        map2[27][i]=3
-        map2[28][i]=3
+        for j in range(0,5,1):
+            map2[i][j]=3
+            map2[j][i]=3
+            map2[i][24+j]=3
+            map2[24+j][i]=3
 
     #모드 및 돌 선택
     drawSetPlayModeMenu()
@@ -483,22 +452,25 @@ def main():
         drawSetDolMenu()  
         if(dol==white):
             map2[14][14]=black
+    else:
+        dol = black
     drawMap()
 
     #오목 시작
     cursor_x, cursor_y = 1, 1
     dolx, doly = 5, 5
     while gameIng:
-        screen.move_cursor_to(1,1)
         on_press()
         drawMap()
         #ai.showMap()
-    
-    screen.move_cursor_to(0, 20)
+    screen.clearScreen()
+    drawMapY=14
+    drawMap()
     if winDolChk==white:
         drawWhiteWin()
     else:
         drawBlackWin()
     on_press()
     gameIng = True
+    drawMapY=0
     screen.clearScreen()

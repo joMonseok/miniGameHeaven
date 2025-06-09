@@ -1,18 +1,7 @@
 import random
 import time
-import threading
-import os
-import sys
-
-#윈도우에서 curses 모듈이 없으면 설치
-try:
-    import curses
-except ImportError:
-    if sys.platform == "win32":
-        os.system("pip install windows-curses")
-        import curses
-    else:
-        raise
+import curses
+import screen
 
 # 떨어질 단어 리스트 
 WORDS = ["break", "elif", "continue", "python", "True", "False", "None", "and", "as"
@@ -30,26 +19,27 @@ class Word:
         self.y = 0 # 세로 (초기에는 맨 위) 
 
 # 게임 화면 그리기 
-def draw_game(stdscr, falling_words, typed_word, score, lives):
-    stdscr.clear()  # 화면 초기화 
-    height, width = stdscr.getmaxyx() # 현재 터미널 크기 가져오기 
+def draw_game(falling_words, typed_word, score, lives):
+    height, width = screen.getmaxyx() # 현재 터미널 크기 가져오기 
 
     # 떨어지는 단어 출력 
     for word in falling_words:
         if 0 <= word.y < height:
-            stdscr.addstr(word.y, word.x, word.text)
+            screen.print(word.x,word.y, word.text)
+            screen.print(word.x,word.y-1, "         ")
 
     # 입력창, 점수, 목숨 정보 출력
-    stdscr.addstr(height - 3, 0, f"-----------------------------------")
-    stdscr.addstr(height - 2, 0, f"Your Input: {typed_word}")
-    stdscr.addstr(height - 1, 0, f"Score: {score}  Lives: {lives}")
-    stdscr.refresh()
+    screen.print(0, height - 3, f"-----------------------------------")
+    if typed_word=="":
+        screen.print(0, height - 2, f"Your Input:                     ")
+    else:
+        screen.print(0, height - 2, f"Your Input: {typed_word}    ")
+    screen.print(0, height - 1, f"Score: {score}  Lives: {lives}")
+    screen.refresh()
 
 # 게임의 메인 함수 
-def game(stdscr):
-    curses.curs_set(0)   # 커서 숨김 
-    stdscr.nodelay(True) # True로 키 입력 비동기 처리 
-    stdscr.timeout(100)  # 입력 대기 시간 설정 (ms)
+def game():
+    screen.setAsyInputMode(100)  # 비동기 입력 모드 설정
 
     falling_words = []   # 화면에 떨어지고 있는 단어 리스트 
     typed_word = ""      # 사용자가 입력한 단어 
@@ -79,14 +69,17 @@ def game(stdscr):
 
         # 사용자 입력 처리 부분  
         try:
-            key = stdscr.getkey()
+            key = screen.getRowKey()
             if key == '\n': # 엔터 클릭 시 
                 matched = False
                 for word in falling_words:
                     if word.text == typed_word:
+                        screen.print(word.x,word.y, "          ")
+                        screen.print(word.x,word.y+1, "          ")
                         falling_words.remove(word)
                         score += 1
                         matched = True
+                        typed_word=""
                         break
                 typed_word = "" # 입력 초기화 
             elif key in ('KEY_BACKSPACE', '\b', '\x7f'): # 백스페이스 처리 
@@ -96,31 +89,29 @@ def game(stdscr):
         except:
             pass # 입력이 없을 경우 넘어감 
 
-        draw_game(stdscr, falling_words, typed_word, score, lives) # 화면 갱신 
+        draw_game(falling_words, typed_word, score, lives) # 화면 갱신 
 
         if lives <= 0:
             # 게임 종료 처리 
-            stdscr.clear()
-            stdscr.nodelay(False)
-            stdscr.timeout(-1)
+            screen.clear()
+            screen.reset()
             # 게임 종료 후 화면 그리기 
-            height, width = stdscr.getmaxyx()
-            stdscr.addstr(height // 2, width // 2 - 5, "Game Over!")
-            stdscr.addstr(height // 2 + 1, width // 2 - 10, f"Your Score: {score}")
-            stdscr.addstr(height // 2 + 2, width // 2 - 10, "Press ESC key to exit.")
+            height, width = screen.getmaxyx()
+            screen.print(width // 2 - 5, height // 2, "Game Over!")
+            screen.print(width // 2 - 10, height // 2 + 1, f"Your Score: {score}")
+            screen.print(width // 2 - 10, height // 2 + 2, "Press ESC key to exit.")
 
-            stdscr.refresh()
+            screen.refresh()
 
             # ESC 키 입력까지 대기 
             while True:
-                key = stdscr.getch()
-                if key == 27: # ESC 키
-                    curses.endwin()
-                    curses.initscr()
+                key = screen.getKey()
+                if key == '\x1b': # ESC 키
                     return
 
 
-def main():
+def winMain():
     curses.wrapper(game)
-def main(std):
-    game(std)
+
+def main():
+    game()

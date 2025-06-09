@@ -1,28 +1,8 @@
 import os
 import platform
-import sys
 import threading
-
-
-# 플랫폼별 키 입력 처리
-if os.name == 'nt':
-    import msvcrt
-
-    def get_key():
-        return msvcrt.getch().decode('utf-8').lower()
-
-else:
-    import tty
-    import termios
-
-    def get_key():
-        fd = sys.stdin.fileno()
-        old_settings = termios.tcgetattr(fd)
-        try:
-            tty.setraw(fd)
-            return sys.stdin.read(1).lower()
-        finally:
-            termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+import screen
+import time
 
 # 게임 설정
 WIDTH = 21
@@ -40,14 +20,18 @@ def clear():
 def draw():
     bar = ['-'] * WIDTH
     bar[position] = '|'
-    print('\r' + ''.join(bar), end='', flush=True)
+    str = ''.join(bar)
+    screen.print(1,2,"Player 1: [A] / Player 2: [L]")
+    screen.print(1,3,"Press the keys quickly to defeat your opponent!")
+    screen.print(0,5, str)
+    screen.refresh()
 
 
 # 플레이어 입력 감지
 def player_listener(player_key, direction):
     global position, game_over
     while not game_over:
-        key = get_key()
+        key = screen.getKey()
         if key == player_key:
             position += direction
             draw()
@@ -60,48 +44,51 @@ def player_listener(player_key, direction):
                 print("\n🎉 Player 2 Wins!")
                 game_over = True
 
-
+mainScreenLines = [
+    " ________  __    __   ______          ______   ________        __       __   ______   _______  ",
+    "/        |/  |  /  | /      \        /      \ /        |      /  |  _  /  | /      \ /       \ ",
+    "$$$$$$$$/ $$ |  $$ |/$$$$$$  |      /$$$$$$  |$$$$$$$$/       $$ | / \ $$ |/$$$$$$  |$$$$$$$  |",
+    "   $$ |   $$ |  $$ |$$ | _$$/       $$ |  $$ |$$ |__          $$ |/$  \$$ |$$ |__$$ |$$ |__$$ |",
+    "   $$ |   $$ |  $$ |$$ |/    |      $$ |  $$ |$$    |         $$ /$$$  $$ |$$    $$ |$$    $$< ",
+    "   $$ |   $$ |  $$ |$$ |$$$$ |      $$ |  $$ |$$$$$/          $$ $$/$$ $$ |$$$$$$$$ |$$$$$$$  |",
+    "   $$ |   $$ \__$$ |$$ \__$$ |      $$ \__$$ |$$ |            $$$$/  $$$$ |$$ |  $$ |$$ |  $$ |",
+    "   $$ |   $$    $$/ $$    $$/       $$    $$/ $$ |            $$$/    $$$ |$$ |  $$ |$$ |  $$ |",
+    "   $$/     $$$$$$/   $$$$$$/         $$$$$$/  $$/             $$/      $$/ $$/   $$/ $$/   $$/ ",
+    "                                                                                                 "   
+]
 def tug_of_war():
     global position, game_over
-    clear()
-    print("\r")
-    print("\r")
-    print(" ________  __    __   ______          ______   ________        __       __   ______   _______  \r")
-    print("/        |/  |  /  | /      \        /      \ /        |      /  |  _  /  | /      \ /       \ \r")
-    print("$$$$$$$$/ $$ |  $$ |/$$$$$$  |      /$$$$$$  |$$$$$$$$/       $$ | / \ $$ |/$$$$$$  |$$$$$$$  |\r")
-    print("   $$ |   $$ |  $$ |$$ | _$$/       $$ |  $$ |$$ |__          $$ |/$  \$$ |$$ |__$$ |$$ |__$$ |\r")
-    print("   $$ |   $$ |  $$ |$$ |/    |      $$ |  $$ |$$    |         $$ /$$$  $$ |$$    $$ |$$    $$< \r")
-    print("   $$ |   $$ |  $$ |$$ |$$$$ |      $$ |  $$ |$$$$$/          $$ $$/$$ $$ |$$$$$$$$ |$$$$$$$  |\r")
-    print("   $$ |   $$ \__$$ |$$ \__$$ |      $$ \__$$ |$$ |            $$$$/  $$$$ |$$ |  $$ |$$ |  $$ |\r")
-    print("   $$ |   $$    $$/ $$    $$/       $$    $$/ $$ |            $$$/    $$$ |$$ |  $$ |$$ |  $$ |\r")
-    print("   $$/     $$$$$$/   $$$$$$/         $$$$$$/  $$/             $$/      $$/ $$/   $$/ $$/   $$/ \r")
-    print("                                                                                                 \r")                                                                                   
-    print("    \r")
-    print("" + " " * 27 + "Press Any Key to Start the Game")
+    position = CENTER
+    game_over = False
+    screen.clear()
+    y=2
+    for mainScreenLine in mainScreenLines:
+        screen.print(0,y,mainScreenLine)
+        y=y+1
+    y=y+2
+    screen.print(27,y,"Press Any Key to Start the Game")
+    screen.refresh()
     start = ''
-    key=get_key()
+    key=screen.getKey()
     if start == '':
-        clear()
+        screen.clearScreen()
+        screen.print(1,2, "╔════════════════════════════════════════════════════════════════════╗\n")
+        screen.print(1,3, "║                         🕹️  How to play guide                      ║\n")
+        screen.print(1,4, "╠════════════════════════════════════════════════════════════════════╣\n")
+        screen.print(1,5, "║   🔹 It\'s a two-player keyboard combo game.                        ║\n")
+        screen.print(1,6, "║                                                                    ║\n")
+        screen.print(1,7, "║   🔸 Player 1 : [ A ] Keep hitting the keys!                       ║\n")
+        screen.print(1,8, "║   🔸 Player 2 : [ L ] Keep hitting the keys!                       ║\n")
+        screen.print(1,9, "║                                                                    ║\n")
+        screen.print(1,10,"║   ⏱️ The person who pulls the rope all the way to the end wins!    ║\n")
+        screen.print(1,11,"║                                                                    ║\n")
+        screen.print(1,12,"║   🚀 When you are ready, press any key to start the game.          ║\n")
+        screen.print(1,13,"╚════════════════════════════════════════════════════════════════════╝\n")
+        screen.refresh()
 
-        print("╔════════════════════════════════════════════════════════╗\r")
-        print("║                    🕹️  게임 방법 안내                   ║\r")
-        print("╠════════════════════════════════════════════════════════╣\r")
-        print("║   🔹 2인용 키보드 연타 게임입니다.                     ║\r")
-        print("║                                                        ║\r")
-        print("║   🔸 Player 1 : [ A ] 키를 연타하세요!                 ║\r")
-        print("║   🔸 Player 2 : [ L ] 키를 연타하세요!                 ║\r")
-        print("║                                                        ║\r")
-        print("║   ⏱️ 줄을 끝까지 당겨오는 사람이 승리합니다!            ║\r")
-        print("║                                                        ║\r")
-        print("║   🚀 준비되었다면 아무 키를 눌러 게임을 시작하세요. ║\r")
-        print("╚════════════════════════════════════════════════════════╝\r")
-        
-        get_key()
-        clear()
+        screen.getKey()
 
-        print("Player 1: [A]키 / Player 2: [L]키\r\n")
-        print("빠르게 키를 눌러 상대편을 이겨보세요!\r\n")
-
+        screen.clearScreen()
         draw()
 
         t1 = threading.Thread(target=player_listener, args=('a', -1))
@@ -113,7 +100,10 @@ def tug_of_war():
         t1.join()
         t2.join()
 
-    print("\n게임 종료!")
+    screen.clearScreen()
+    screen.print(1,3,"\nGAME OVER!")
+    screen.refresh()
+    time.sleep(5)  # 5초 대기
 
 
 if __name__ == "__main__":
