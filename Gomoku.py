@@ -436,6 +436,9 @@ def drawSetPlayModeMenu():
 
 def main():
     global gameIng, dolx, doly, cursor_x, cursor_y, dol, drawMapY
+    
+    cursor_x, cursor_y = 1, 1
+    dolx, doly = 5, 5
     for i in range(0,29,1):#맵 초기화
         for j in range(0,29,1):
             map2[i][j]=0
@@ -454,11 +457,9 @@ def main():
             map2[14][14]=black
     else:
         dol = black
-    drawMap()
 
     #오목 시작
-    cursor_x, cursor_y = 1, 1
-    dolx, doly = 5, 5
+    drawMap()
     while gameIng:
         on_press()
         drawMap()
