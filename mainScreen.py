@@ -70,25 +70,10 @@ mainScreenLines = [
 ]
 
 def mainScreen():
-    #screen.move_cursor_to(0, 0)
-    y=10
-    for line in mainScreenLines:     # lines: 한 줄씩 분리된 문자열 리스트
-        screen.print(25, y, line)
-        y += 1
+    screen.draw_centered_menu(mainScreenLines)
 
 def showMenu():
-    x=57
-    y=33
-    #screen.move_cursor_to(x, y)
-    i=0
-    for item in menu:
-        #screen.move_cursor_to(x, y+i)
-        if(cursor_y == i):
-            str = "-->"+menu[i]
-            screen.print(x,y+i,str)
-        else:
-            screen.print(x,y+i,menu[i])
-        i=i+1
+    screen.draw_centered_menuCommand(menu,20,15,cursor_y)
 
     
     #screen.move_cursor_to(0, 0)

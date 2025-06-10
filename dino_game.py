@@ -65,14 +65,9 @@ def show_title_screen():
     screen.clearScreen()
     
     # 화면 중앙에 타이틀 표시
-    start_y = 8  # 시작 y 위치
-    start_x = 10  # 시작 x 위치
-    
-    for i, line in enumerate(TITLE_ART):
-        screen.print(start_x+20, start_y + i+10,line)
-    
+    screen.draw_centered_menu(TITLE_ART)
+    screen.draw_centered_str("Press any key to start...", div=5, loc=3)
     # 시작 안내 메시지
-    screen.print(55, start_y + 18,"Start the game...")
     screen.refresh()
 
     time.sleep(2)  # 2초 대기
@@ -168,12 +163,14 @@ def draw_game():
         game_display[1][2 + i] = char
     
     # 화면 출력
-    y=0
-    for row in game_display:
-        str= ''.join(row)
-        screen.print(20, y+10, str)
-        y=y+1
-        #print(''.join(row), '\r')
+    # y=0
+    # for row in game_display:
+    #     str= ''.join(row)
+    #     screen.print(20, y+10, str)
+    #     y=y+1
+    #     #print(''.join(row), '\r')
+    string_display = [''.join(row) for row in game_display]
+    screen.draw_centered_menu(string_display)
     screen.refresh()
     
         
@@ -200,9 +197,12 @@ def main():
                 draw_game()    # 화면 그리기
             else:
                 screen.clear()
-                screen.print(55, 20,"Game Over!")
-                screen.print(50, 21, f"Score: {score}")
-                screen.print(45, 22,"Press Q to return to menu...")
+                str = [
+                    "Game Over!",
+                    f"Score: {score}",
+                    "Press Q to return to menu..."
+                ]
+                screen.draw_centered_menu(str)
                 screen.refresh()
                 try:
                     key = screen.getKey()

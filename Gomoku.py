@@ -289,7 +289,13 @@ def chkDol(x,y,plusX,plusY,dol,wei):
     return wei
 #오목 판 그리기
 drawMapY=0
-def drawMap():
+def drawMap(div=2,loc=1):
+    longest = 37
+    h, w = screen.getmaxyx()  # 현재 터미널의 높이와 너비를 가져옴
+    n_lines = 19
+    n_cols = longest
+    start_y = (h//div) * loc - (n_lines // 2)
+    start_x = (w - n_cols) // 2
     y=11
     for i in range(0,19,1):
         j2=0
@@ -313,7 +319,7 @@ def drawMap():
             else:
                 str = map1[i][j]
             startStr= ""+startStr+str+lastStr
-            screen.printColor(j+43,i+drawMapY+10,startStr,color)
+            screen.printColor(start_x+j,i+start_y,startStr,color)
             y=y+1
 
 setPlayModeIng = True
@@ -370,44 +376,41 @@ drawMainMenuLines = [
 ]
 #기본 화면
 def drawMenu():
-    y=10
-    for line in drawMainMenuLines:     # lines: 한 줄씩 분리된 문자열 리스트
-        screen.print(25, y, line)
-        y += 1
+    screen.draw_centered_menu(drawMainMenuLines)
 
-#하얀 돌 이기면
-def drawWhiteWin():
-    screen.print(36,13,"    ██     ██ ██    ██ ██████ ████████ ██████")
-    screen.print(36,14,"    ██     ██ ██    ██   ██      ██    ██    ")
-    screen.print(36,15,"    ██  █  ██ ████████   ██      ██    ██████")
-    screen.print(36,16,"    ██ ███ ██ ██    ██   ██      ██    ██    ")
-    screen.print(36,17,"     ███ ███  ██    ██ ██████    ██    ██████")
-    screen.print(36,19,"                ██████ ██ ██ ████")
+whiteWinStr = [
+    "    ██     ██ ██    ██ ██████ ████████ ██████",
+    "    ██     ██ ██    ██   ██      ██    ██    ",
+    "    ██  █  ██ ████████   ██      ██    ██████",
+    "    ██ ███ ██ ██    ██   ██      ██    ██    ",
+    "     ███ ███  ██    ██ ██████    ██    ██████",
+    "                                             ",
+    "                ██████ ██ ██ ████            "
+]
+blackWinStr = [
+    "    ██████  ██      █████   ██████  ██   ██",
+    "    ██   ██ ██     ██   ██ ██       ██  ██ ",
+    "    ██████  ██     ███████ ██       █████  ",
+    "    ██   ██ ██     ██   ██ ██       ██  ██ ",
+    "    ██████  ██████ ██   ██  ██████  ██   ██",
+    "                                           ",
+    "                ██████ ██ ██ ████          "
+]
 
-#검은 돌 이기면
-def drawBlackWin():
-    screen.print(36,13,"    ██████  ██      █████   ██████  ██   ██")
-    screen.print(36,14,"    ██   ██ ██     ██   ██ ██       ██  ██ ")
-    screen.print(36,15,"    ██████  ██     ███████ ██       █████  ")
-    screen.print(36,16,"    ██   ██ ██     ██   ██ ██       ██  ██ ")
-    screen.print(36,17,"    ██████  ██████ ██   ██  ██████  ██   ██")
-    screen.print(36,19,"                ██████ ██ ██ ████")
+setDolMenuStr = [
+    "1. Black Dol",
+    "2. White Dol"
+]
+setPlayModeMenuStr = [
+    "1. one Person Play",
+    "2. two Person Play"
+]
 
 def drawDolMenu():
-    if(cursor_y==1):
-        screen.print(58,28,"--> Black Dol\r")
-        screen.print(58,29,"White Dol    \r")
-    else:
-        screen.print(58,28,"Black Dol    \r")
-        screen.print(58,29,"--> White Dol\r")
+    screen.draw_centered_menuCommand(setDolMenuStr,5,3, cursor_y-1)
 
 def drawPlayModeMenu():
-    if(cursor_y==1):
-        screen.print(58,28,"--> one Person Play\r")
-        screen.print(58,29,"two Person Play    \r")
-    else:
-        screen.print(58,28,"one Person Play    \r")
-        screen.print(58,29,"--> two Person Play\r")
+    screen.draw_centered_menuCommand(setPlayModeMenuStr,5,3, cursor_y-1)
 
 #사용할 돌 선택
 def drawSetDolMenu():
@@ -463,14 +466,16 @@ def main():
     while gameIng:
         on_press()
         drawMap()
+        screen.refresh()
         #ai.showMap()
     screen.clearScreen()
     drawMapY=14
-    drawMap()
+    drawMap(5,3)
     if winDolChk==white:
-        drawWhiteWin()
+        screen.draw_centered_menuCommand(whiteWinStr, 20,3)
     else:
-        drawBlackWin()
+        screen.draw_centered_menuCommand(blackWinStr, 20,3)
+    screen.refresh()
     on_press()
     gameIng = True
     drawMapY=0

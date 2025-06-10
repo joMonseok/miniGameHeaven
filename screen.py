@@ -1,7 +1,43 @@
 import os
 import curses
+import time
 
 stdscr=0
+
+def draw_centered_menu(lines):
+    h, w = stdscr.getmaxyx()
+    n_lines = len(lines)
+    n_cols = len(lines[0])
+    start_y = round((h - n_lines) / 2)
+    start_x = round((w - n_cols) / 2)
+    for line in lines:
+        stdscr.addstr(start_y,start_x,line)
+        start_y=start_y+1
+
+def draw_centered_menuCommand(lines,div=2,loc=1,cursor_y=-1):
+    longest = len(max(lines, key=len))
+    h, w = stdscr.getmaxyx()
+    n_lines = len(lines)
+    n_cols = longest
+    start_y = round((h/div) *loc - (n_lines // 2))
+    start_x = (w - n_cols) // 2
+    idx=0
+    for line in lines:
+        x=(longest-len(line))//2
+        if cursor_y!=-1 and idx == cursor_y:
+            stdscr.addstr(start_y,start_x-4,"--> "+(" "*x)+line)
+        else:
+            stdscr.addstr(start_y,start_x-4,"   "+(" "*x)+line+"    ")
+        idx+=1
+        start_y=start_y+1
+def draw_centered_str(str,div=2,loc=1):
+    longest = len(str)
+    h, w = stdscr.getmaxyx()
+    n_cols = longest
+    start_y = round((h/div) *loc)
+    start_x = (w - n_cols) // 2
+    stdscr.addstr(start_y,start_x,str)
+
 
 def setStdscr(_stdscr):
     global stdscr
